@@ -11,7 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-
 import com.example.habitatguardx.di.DatabaseModule
 import com.example.habitatguardx.domain.model.CatalogoInfraestructura
 import com.example.habitatguardx.presentation.navigation.*
@@ -24,6 +23,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
 
         val repository = DatabaseModule.provideRepository(
             applicationContext

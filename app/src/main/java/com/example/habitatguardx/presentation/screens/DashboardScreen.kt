@@ -11,8 +11,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DashboardScreen(
-    onNuevaInspeccion: () -> Unit
-) {
+    onNuevaInspeccion: () -> Unit,
+    onConsultarInspecciones: () -> Unit
+){
 
     Column(
         modifier = Modifier
@@ -67,7 +68,7 @@ fun DashboardScreen(
         }
 
         OutlinedButton(
-            onClick = { },
+            onClick = onConsultarInspecciones,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Consultar inspecciones")

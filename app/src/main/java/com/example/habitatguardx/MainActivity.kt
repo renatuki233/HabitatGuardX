@@ -16,12 +16,29 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.habitatguardx.presentation.screens.NuevaInspeccionScreen
 
+import com.example.habitatguardx.presentation.screens.ConsultarInspeccionesScreen
+
+import androidx.lifecycle.ViewModelProvider
+import com.example.habitatguardx.di.DatabaseModule
+import com.example.habitatguardx.presentation.viewmodel.InspeccionViewModel
+import com.example.habitatguardx.presentation.viewmodel.InspeccionViewModelFactory
+
+
 import com.example.habitatguardx.presentation.screens.DashboardScreen
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val repository = DatabaseModule.provideRepository(
+            applicationContext
+        )
+
+        val inspeccionViewModel = ViewModelProvider(
+            this,
+            InspeccionViewModelFactory(repository)
+        )[InspeccionViewModel::class.java]
         enableEdgeToEdge()
         setContent {
             HabitatGuardXTheme {
@@ -35,10 +52,21 @@ class MainActivity : ComponentActivity() {
                     "dashboard" -> DashboardScreen(
                         onNuevaInspeccion = {
                             pantallaActual = "nueva_inspeccion"
+                        },
+                        onConsultarInspecciones = {
+                            pantallaActual = "consultar_inspecciones"
                         }
                     )
 
                     "nueva_inspeccion" -> NuevaInspeccionScreen(
+                        onVolver = {
+                            pantallaActual = "dashboard"
+                        },
+                        viewModel = inspeccionViewModel
+                    )
+
+                    "consultar_inspecciones" -> ConsultarInspeccionesScreen(
+                        repository = repository,
                         onVolver = {
                             pantallaActual = "dashboard"
                         }

@@ -12,6 +12,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.habitatguardx.ui.theme.HabitatGuardXTheme
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
+import com.example.habitatguardx.presentation.screens.NuevaInspeccionScreen
+
+import com.example.habitatguardx.presentation.screens.DashboardScreen
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,10 +25,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HabitatGuardXTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
+
+                var pantallaActual by rememberSaveable {
+                    mutableStateOf("dashboard")
+                }
+
+                when (pantallaActual) {
+
+                    "dashboard" -> DashboardScreen(
+                        onNuevaInspeccion = {
+                            pantallaActual = "nueva_inspeccion"
+                        }
+                    )
+
+                    "nueva_inspeccion" -> NuevaInspeccionScreen(
+                        onVolver = {
+                            pantallaActual = "dashboard"
+                        }
                     )
                 }
             }

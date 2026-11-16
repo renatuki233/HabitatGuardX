@@ -12,14 +12,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.example.habitatguardx.data.repository.InspeccionRepository
+import com.example.habitatguardx.domain.repository.InspeccionRepositoryContract
 import kotlinx.coroutines.flow.map
 
 
 @Composable
 
 fun DashboardScreen(
-    repository: InspeccionRepository,
+    repository: InspeccionRepositoryContract,
     onNuevaInspeccion: () -> Unit,
     onConsultarInspecciones: () -> Unit,
     onEscanearQR: () -> Unit

@@ -1,11 +1,10 @@
-
 package com.example.habitatguardx.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.habitatguardx.data.local.InspeccionEntity
-import com.example.habitatguardx.data.repository.InspeccionRepository
+import com.example.habitatguardx.domain.model.Inspeccion
+import com.example.habitatguardx.domain.repository.InspeccionRepositoryContract
 import com.example.habitatguardx.domain.usecase.EvaluarRiesgoUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,7 +15,7 @@ import java.util.Date
 import java.util.Locale
 
 class InspeccionViewModel(
-    private val repository: InspeccionRepository
+    private val repository: InspeccionRepositoryContract
 ) : ViewModel() {
 
     private val evaluarRiesgo = EvaluarRiesgoUseCase()
@@ -26,7 +25,8 @@ class InspeccionViewModel(
         _guardadoExitoso.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    val error: StateFlow<String?> =
+        _error.asStateFlow()
 
     fun guardarInspeccion(
         nombreArea: String,
@@ -36,6 +36,11 @@ class InspeccionViewModel(
     ) {
         if (nombreArea.isBlank() || descripcion.isBlank()) {
             _error.value = "Completa todos los campos"
+            return
+        }
+
+        if (gravedad !in 1..5 || probabilidad !in 1..5) {
+            _error.value = "Los valores deben estar entre 1 y 5"
             return
         }
 
@@ -54,17 +59,19 @@ class InspeccionViewModel(
                     Locale.getDefault()
                 ).format(Date())
 
-                val inspeccion = InspeccionEntity(
+                val inspeccion = Inspeccion(
                     nombreArea = nombreArea.trim(),
                     descripcion = descripcion.trim(),
                     fecha = fecha,
                     gravedad = gravedad,
                     probabilidad = probabilidad,
-                    nivelRiesgo = nivel.name,
-                    puntajeSalud = ((25 - gravedad * probabilidad) * 100) / 24
+                    nivelRiesgo = nivel,
+                    puntajeSalud =
+                    ((25 - gravedad * probabilidad) * 100) / 24
                 )
 
                 repository.guardarInspeccion(inspeccion)
+
                 _guardadoExitoso.value = true
 
             } catch (e: Exception) {
@@ -81,7 +88,7 @@ class InspeccionViewModel(
 }
 
 class InspeccionViewModelFactory(
-    private val repository: InspeccionRepository
+    private val repository: InspeccionRepositoryContract
 ) : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
@@ -93,6 +100,7 @@ class InspeccionViewModelFactory(
                 InspeccionViewModel::class.java
             )
         )
+
         return InspeccionViewModel(repository) as T
     }
 }

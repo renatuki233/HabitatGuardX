@@ -8,14 +8,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.habitatguardx.data.local.InspeccionEntity
-import com.example.habitatguardx.data.repository.InspeccionRepository
+import com.example.habitatguardx.domain.model.Inspeccion
+import com.example.habitatguardx.domain.repository.InspeccionRepositoryContract
 
 @Composable
 fun ConsultarInspeccionesScreen(
-    repository: InspeccionRepository,
+    repository: InspeccionRepositoryContract,
     onVolver: () -> Unit
-) {
+){
     val inspecciones by repository
         .obtenerInspecciones()
         .collectAsState(initial = emptyList())
@@ -57,7 +57,7 @@ fun ConsultarInspeccionesScreen(
 
 @Composable
 private fun TarjetaInspeccion(
-    inspeccion: InspeccionEntity
+    inspeccion: Inspeccion
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()

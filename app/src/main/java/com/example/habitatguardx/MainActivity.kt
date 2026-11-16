@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+
+import com.example.habitatguardx.presentation.screens.QRScannerScreen
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -49,14 +52,20 @@ class MainActivity : ComponentActivity() {
 
                 when (pantallaActual) {
 
+
                     "dashboard" -> DashboardScreen(
+                        repository = repository,
                         onNuevaInspeccion = {
                             pantallaActual = "nueva_inspeccion"
                         },
                         onConsultarInspecciones = {
                             pantallaActual = "consultar_inspecciones"
+                        },
+                        onEscanearQR = {
+                            pantallaActual = "escanear_qr"
                         }
                     )
+
 
                     "nueva_inspeccion" -> NuevaInspeccionScreen(
                         onVolver = {
@@ -71,6 +80,13 @@ class MainActivity : ComponentActivity() {
                             pantallaActual = "dashboard"
                         }
                     )
+
+                    "escanear_qr" -> QRScannerScreen(
+                        onVolver = {
+                            pantallaActual = "dashboard"
+                        }
+                    )
+
                 }
             }
         }

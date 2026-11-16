@@ -9,11 +9,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import com.example.habitatguardx.data.repository.InspeccionRepository
+import kotlinx.coroutines.flow.map
+
+
 @Composable
+
 fun DashboardScreen(
+    repository: InspeccionRepository,
     onNuevaInspeccion: () -> Unit,
-    onConsultarInspecciones: () -> Unit
-){
+    onConsultarInspecciones: () -> Unit,
+    onEscanearQR: () -> Unit
+) {
+    val total by remember(repository) {
+        repository.contarInspecciones()
+    }.collectAsState(initial = 0)
+
+    val riesgosAltos by remember(repository) {
+        repository.contarRiesgosAltos()
+    }.collectAsState(initial = 0)
+
+    val healthScore by remember(repository) {
+        repository.obtenerInspecciones().map { lista ->
+            if (lista.isEmpty()) {
+                null
+            } else {
+                lista.map { it.puntajeSalud }.average().toInt()
+            }
+        }
+    }.collectAsState(initial = null)
+
 
     Column(
         modifier = Modifier
@@ -40,19 +68,20 @@ fun DashboardScreen(
             style = MaterialTheme.typography.titleLarge
         )
 
+
         TarjetaIndicador(
             titulo = "Inspecciones registradas",
-            valor = "0"
+            valor = total.toString()
         )
 
         TarjetaIndicador(
             titulo = "Riesgos detectados",
-            valor = "0"
+            valor = riesgosAltos.toString()
         )
 
         TarjetaIndicador(
             titulo = "Campus Health Score",
-            valor = "Sin datos"
+            valor = healthScore?.let { "$it / 100" } ?: "Sin datos"
         )
 
         Text(
@@ -75,13 +104,14 @@ fun DashboardScreen(
         }
 
         OutlinedButton(
-            onClick = { },
+            onClick = onEscanearQR,
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Escanear código QR")
         }
     }
 }
+
 
 @Composable
 fun TarjetaIndicador(

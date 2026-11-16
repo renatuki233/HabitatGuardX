@@ -1,36 +1,27 @@
+
 package com.example.habitatguardx
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-
-import com.example.habitatguardx.presentation.screens.QRScannerScreen
-
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.habitatguardx.ui.theme.HabitatGuardXTheme
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
-import com.example.habitatguardx.presentation.screens.NuevaInspeccionScreen
-
-import com.example.habitatguardx.presentation.screens.ConsultarInspeccionesScreen
-
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+
 import com.example.habitatguardx.di.DatabaseModule
+import com.example.habitatguardx.domain.model.CatalogoInfraestructura
+import com.example.habitatguardx.presentation.navigation.*
+import com.example.habitatguardx.presentation.screens.*
 import com.example.habitatguardx.presentation.viewmodel.InspeccionViewModel
 import com.example.habitatguardx.presentation.viewmodel.InspeccionViewModelFactory
-
-
-import com.example.habitatguardx.presentation.screens.DashboardScreen
-
+import com.example.habitatguardx.ui.theme.HabitatGuardXTheme
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -42,78 +33,105 @@ class MainActivity : ComponentActivity() {
             this,
             InspeccionViewModelFactory(repository)
         )[InspeccionViewModel::class.java]
+
         enableEdgeToEdge()
+
         setContent {
             HabitatGuardXTheme {
 
-                var pantallaActual by rememberSaveable {
-                    mutableStateOf("dashboard")
+                val navController = rememberNavController()
+
+                fun volverAlDashboard() {
+                    navController.navigate(DashboardRoute) {
+                        popUpTo<DashboardRoute> {
+                            inclusive = false
+                        }
+                        launchSingleTop = true
+                    }
                 }
-                var codigoAreaSeleccionada by remember {
-                    mutableStateOf<String?>(null)
-                }
 
-                when (pantallaActual) {
+                NavHost(
+                    navController = navController,
+                    startDestination = DashboardRoute
+                ) {
 
+                    composable<DashboardRoute> {
+                        DashboardScreen(
+                            repository = repository,
+                            onNuevaInspeccion = {
+                                navController.navigate(
+                                    NuevaInspeccionRoute()
+                                )
+                            },
+                            onConsultarInspecciones = {
+                                navController.navigate(
+                                    ConsultarInspeccionesRoute
+                                )
+                            },
+                            onEscanearQR = {
+                                navController.navigate(
+                                    QRScannerRoute
+                                )
+                            }
+                        )
+                    }
 
-                    "dashboard" -> DashboardScreen(
-                        repository = repository,
-                        onNuevaInspeccion = {
-                            pantallaActual = "nueva_inspeccion"
-                        },
-                        onConsultarInspecciones = {
-                            pantallaActual = "consultar_inspecciones"
-                        },
-                        onEscanearQR = {
-                            pantallaActual = "escanear_qr"
-                        }
-                    )
+                    composable<NuevaInspeccionRoute> { entry ->
 
+                        val ruta =
+                            entry.toRoute<NuevaInspeccionRoute>()
 
-                    "nueva_inspeccion" -> NuevaInspeccionScreen(
-                        onVolver = {
-                            codigoAreaSeleccionada = null
-                            pantallaActual = "dashboard"
-                        },
-                        viewModel = inspeccionViewModel,
-                        codigoArea = codigoAreaSeleccionada
-                    )
+                        NuevaInspeccionScreen(
+                            onVolver = {
+                                volverAlDashboard()
+                            },
+                            viewModel = inspeccionViewModel,
+                            codigoArea = ruta.codigoArea
+                        )
+                    }
 
-                    "consultar_inspecciones" -> ConsultarInspeccionesScreen(
-                        repository = repository,
-                        onVolver = {
-                            pantallaActual = "dashboard"
-                        }
-                    )
+                    composable<ConsultarInspeccionesRoute> {
+                        ConsultarInspeccionesScreen(
+                            repository = repository,
+                            onVolver = {
+                                volverAlDashboard()
+                            }
+                        )
+                    }
 
-                    "escanear_qr" -> QRScannerScreen(
-                        onVolver = {
-                            pantallaActual = "dashboard"
-                        },
-                        onCrearInspeccion = { codigo ->
-                            codigoAreaSeleccionada = codigo
-                            pantallaActual = "nueva_inspeccion"
-                        }
-                    )
+                    composable<QRScannerRoute> {
+                        QRScannerScreen(
+                            onVolver = {
+                                volverAlDashboard()
+                            },
+                            onCrearInspeccion = { codigo ->
 
+                                val infraestructura =
+                                    CatalogoInfraestructura
+                                        .buscarPorQR(codigo)
+
+                                if (infraestructura != null) {
+
+                                    navController.navigate(
+                                        NuevaInspeccionRoute(
+                                            codigoArea =
+                                            infraestructura.nombre
+                                        )
+                                    )
+
+                                } else {
+
+                                    Toast.makeText(
+                                        this@MainActivity,
+                                        "Código QR no registrado en el catálogo",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    HabitatGuardXTheme {
-        Greeting("Android")
     }
 }

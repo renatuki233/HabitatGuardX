@@ -24,7 +24,8 @@ import java.util.concurrent.Executors
 
 @Composable
 fun QRScannerScreen(
-    onVolver: () -> Unit
+    onVolver: () -> Unit,
+    onCrearInspeccion: (String) -> Unit
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -154,6 +155,16 @@ fun QRScannerScreen(
                 text = "Código QR detectado",
                 style = MaterialTheme.typography.titleLarge
             )
+            Button(
+                onClick = {
+                    codigoDetectado?.let { codigo ->
+                        onCrearInspeccion(codigo)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Crear inspección de esta área")
+            }
 
             ElevatedCard {
                 Text(

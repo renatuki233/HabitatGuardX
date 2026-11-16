@@ -19,7 +19,8 @@ import com.example.habitatguardx.presentation.viewmodel.InspeccionViewModel
 @Composable
 fun NuevaInspeccionScreen(
     onVolver: () -> Unit,
-    viewModel: InspeccionViewModel
+    viewModel: InspeccionViewModel,
+    codigoArea: String? = null
 ) {
     val guardadoExitoso by viewModel.guardadoExitoso.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -30,8 +31,8 @@ fun NuevaInspeccionScreen(
             onVolver()
         }
     }
-    var nombreArea by rememberSaveable {
-        mutableStateOf("")
+    var nombreArea by remember(codigoArea) {
+        mutableStateOf(codigoArea.orEmpty())
     }
 
     var descripcion by rememberSaveable {

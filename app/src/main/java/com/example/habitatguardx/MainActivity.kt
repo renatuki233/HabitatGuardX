@@ -49,6 +49,9 @@ class MainActivity : ComponentActivity() {
                 var pantallaActual by rememberSaveable {
                     mutableStateOf("dashboard")
                 }
+                var codigoAreaSeleccionada by remember {
+                    mutableStateOf<String?>(null)
+                }
 
                 when (pantallaActual) {
 
@@ -69,9 +72,11 @@ class MainActivity : ComponentActivity() {
 
                     "nueva_inspeccion" -> NuevaInspeccionScreen(
                         onVolver = {
+                            codigoAreaSeleccionada = null
                             pantallaActual = "dashboard"
                         },
-                        viewModel = inspeccionViewModel
+                        viewModel = inspeccionViewModel,
+                        codigoArea = codigoAreaSeleccionada
                     )
 
                     "consultar_inspecciones" -> ConsultarInspeccionesScreen(
@@ -84,6 +89,10 @@ class MainActivity : ComponentActivity() {
                     "escanear_qr" -> QRScannerScreen(
                         onVolver = {
                             pantallaActual = "dashboard"
+                        },
+                        onCrearInspeccion = { codigo ->
+                            codigoAreaSeleccionada = codigo
+                            pantallaActual = "nueva_inspeccion"
                         }
                     )
 
